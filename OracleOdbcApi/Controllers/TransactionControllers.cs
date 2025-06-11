@@ -45,7 +45,10 @@ namespace OracleOdbcApi.Transactions
                 {
                     var row = new Dictionary<string, object>();
                     for (int i = 0; i < reader.FieldCount; i++)
-                        row[reader.GetName(i)] = reader.IsDBNull(i) ? null! :.Add(row); 
+                    {
+                        row[reader.GetName(i)] = reader.IsDBNull(i) ? null! : reader.GetValue(i);
+                    }
+                    results.Add(row); 
                 }
 
                 return Ok(results);
