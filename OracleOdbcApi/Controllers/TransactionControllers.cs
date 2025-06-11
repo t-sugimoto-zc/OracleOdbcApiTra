@@ -73,15 +73,4 @@ namespace OracleOdbcApi.Transactions
             return Ok(new { message = "ロールバックしました。" });
         }
     }
-
-    public class TransactionQuery
-    {
-        public string SessionId { get; set; } = string.Empty;
-        public string Sql { get; set; } = string.Empty;
-    }
-
-    public class SessionRequest
-    {
-        public string SessionId { get; set; } = string.Empty;
-    }
 }
