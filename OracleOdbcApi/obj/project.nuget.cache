@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "FJ4lhYUxgfQ=",
+  "success": true,
+  "projectFilePath": "C:\\work\\OracleOdbcApi\\OracleOdbcApi\\OracleOdbcApi.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\t-sugimoto_zc\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.4\\microsoft.aspnetcore.openapi.9.0.4.nupkg.sha512",
+    "C:\\Users\\t-sugimoto_zc\\.nuget\\packages\\microsoft.openapi\\1.6.17\\microsoft.openapi.1.6.17.nupkg.sha512",
+    "C:\\Users\\t-sugimoto_zc\\.nuget\\packages\\system.data.odbc\\9.0.5\\system.data.odbc.9.0.5.nupkg.sha512"
+  ],
+  "logs": []
+}
