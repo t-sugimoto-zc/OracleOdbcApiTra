@@ -10,16 +10,21 @@ namespace OracleOdbcApi.Transactions
     {
         private readonly IConfiguration _config;
         private readonly TransactionSessionManager _sessionManager;
+        private readonly ILogger<TransactionController> _logger;
 
-        public TransactionController(IConfiguration config, TransactionSessionManager sessionManager)
+        public TransactionController(IConfiguration config, TransactionSessionManager sessionManager, ILogger<TransactionController> logger)
         {
             _config = config;
             _sessionManager = sessionManager;
+            _logger = logger;
         }
 
         [HttpPost("start")]
         public IActionResult StartTransaction()
         {
+            var podName = Environment.GetEnvironmentVariable("HOSTNAME") ?? "unknown";
+            _logger.LogInformation($"StartTransaction called on pod: {podName}");
+
             var connStr = _config.GetConnectionString("OracleOdbc");
             if (string.IsNullOrWhiteSpace(connStr))
                 return StatusCode(500, new { error = "接続文字列が設定されていません。" });
@@ -31,6 +36,9 @@ namespace OracleOdbcApi.Transactions
         [HttpPost("query")]
         public IActionResult ExecuteQuery([FromBody] TransactionQuery query)
         {
+            var podName = Environment.GetEnvironmentVariable("HOSTNAME") ?? "unknown";
+            _logger.LogInformation($"StartTransaction called on pod: {podName}");
+
             var session = _sessionManager.GetSession(query.SessionId);
             if (session == null)
                 return BadRequest(new { error = "無効なセッションIDです。" });
@@ -62,6 +70,9 @@ namespace OracleOdbcApi.Transactions
         [HttpPost("commit")]
         public IActionResult Commit([FromBody] SessionRequest request)
         {
+            var podName = Environment.GetEnvironmentVariable("HOSTNAME") ?? "unknown";
+            _logger.LogInformation($"StartTransaction called on pod: {podName}");
+            
             _sessionManager.Commit(request.SessionId);
             return Ok(new { message = "コミットしました。" });
         }
@@ -69,6 +80,9 @@ namespace OracleOdbcApi.Transactions
         [HttpPost("rollback")]
         public IActionResult Rollback([FromBody] SessionRequest request)
         {
+            var podName = Environment.GetEnvironmentVariable("HOSTNAME") ?? "unknown";
+            _logger.LogInformation($"StartTransaction called on pod: {podName}");
+            
             _sessionManager.Rollback(request.SessionId);
             return Ok(new { message = "ロールバックしました。" });
         }
