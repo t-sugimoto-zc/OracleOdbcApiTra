@@ -23,13 +23,12 @@ namespace OracleOdbcApi.Transactions
         public IActionResult StartTransaction()
         {
             var podName = Environment.GetEnvironmentVariable("HOSTNAME") ?? "unknown";
-            _logger.LogInformation($"StartTransaction called on pod: {podName}");
-
             var connStr = _config.GetConnectionString("OracleOdbc");
             if (string.IsNullOrWhiteSpace(connStr))
                 return StatusCode(500, new { error = "接続文字列が設定されていません。" });
 
             var sessionId = _sessionManager.StartSession(connStr);
+            _logger.LogInformation("StartTransaction: SessionID={SessionId}, Pod={PodName}", sessionId, podName);
             return Ok(new { sessionId });
         }
 
@@ -37,11 +36,14 @@ namespace OracleOdbcApi.Transactions
         public IActionResult ExecuteQuery([FromBody] TransactionQuery query)
         {
             var podName = Environment.GetEnvironmentVariable("HOSTNAME") ?? "unknown";
-            _logger.LogInformation($"Query request called on pod: {podName}");
-
             var session = _sessionManager.GetSession(query.SessionId);
             if (session == null)
+            {
+                _logger.LogWarning("ExecuteQuery: Invalid SessionID={SessionId}, Pod={PodName}", query.SessionId, podName);
                 return BadRequest(new { error = "無効なセッションIDです。" });
+            }
+
+            _logger.LogInformation("ExecuteQuery: SessionID={SessionId}, Pod={PodName}", query.SessionId, podName);
 
             try
             {
@@ -63,6 +65,7 @@ namespace OracleOdbcApi.Transactions
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "ExecuteQuery: Error executing SQL. SessionID={SessionId}, Pod={PodName}", query.SessionId, podName);
                 return StatusCode(500, new { error = "SQL実行中にエラーが発生しました。", message = ex.Message });
             }
         }
@@ -71,12 +74,13 @@ namespace OracleOdbcApi.Transactions
         public IActionResult Commit([FromBody] SessionRequest request)
         {
             var podName = Environment.GetEnvironmentVariable("HOSTNAME") ?? "unknown";
-            _logger.LogInformation($"Commit called on pod: {podName}");
-            
             var session = _sessionManager.GetSession(request.SessionId);
             if (session == null)
+            {
+                _logger.LogWarning("Commit: Invalid SessionID={SessionId}, Pod={PodName}", request.SessionId, podName);
                 return BadRequest(new { error = "無効なセッションIDです。" });
-
+            }
+            _logger.LogInformation("Commit: SessionID={SessionId}, Pod={PodName}", request.SessionId, podName);
             _sessionManager.Commit(request.SessionId);
             return Ok(new { message = "コミットしました。" });
         }
@@ -85,12 +89,14 @@ namespace OracleOdbcApi.Transactions
         public IActionResult Rollback([FromBody] SessionRequest request)
         {
             var podName = Environment.GetEnvironmentVariable("HOSTNAME") ?? "unknown";
-            _logger.LogInformation($"Rollback called on pod: {podName}");
-            
             var session = _sessionManager.GetSession(request.SessionId);
             if (session == null)
+            {
+                _logger.LogWarning("Rollback: Invalid SessionID={SessionId}, Pod={PodName}", request.SessionId, podName);
                 return BadRequest(new { error = "無効なセッションIDです。" });
+            }
 
+            _logger.LogInformation("Rollback: SessionID={SessionId}, Pod={PodName}", request.SessionId, podName);
             _sessionManager.Rollback(request.SessionId);
             return Ok(new { message = "ロールバックしました。" });
         }
